@@ -19,7 +19,7 @@ package vinyldns.api
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ActorMaterializer, Materializer}
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{ContextShift, IO, IOApp, Timer}
 import fs2.concurrent.SignallingRef
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.dropwizard.DropwizardExports
@@ -42,7 +42,7 @@ import vinyldns.core.repository.DataStoreLoader
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.{Codec, Source}
 
-object Boot extends App {
+object Boot extends App with IOApp {
 
   private val logger = LoggerFactory.getLogger("Boot")
   private implicit val system: ActorSystem = VinylDNSConfig.system

@@ -16,9 +16,11 @@
 
 package vinyldns.core.repository
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO, Timer}
 import vinyldns.core.crypto.CryptoAlgebra
 
 trait DataStoreProvider {
-  def load(config: DataStoreConfig, crypto: CryptoAlgebra): IO[LoadedDataStore]
+  def load(config: DataStoreConfig, crypto: CryptoAlgebra)(
+      implicit cs: ContextShift[IO],
+      t: Timer[IO]): IO[LoadedDataStore]
 }

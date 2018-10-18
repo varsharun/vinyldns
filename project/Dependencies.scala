@@ -1,20 +1,21 @@
 import sbt._
 object Dependencies {
 
-  lazy val akkaHttpV = "10.1.5"
-  lazy val akkaV = "2.5.12"
-  lazy val jettyV = "8.1.12.v20130726"
-  lazy val pureConfigV = "0.9.2"
-  lazy val metricsScalaV = "3.5.9"
-  lazy val prometheusV = "0.4.0"
-  lazy val catsEffectV = "1.0.0"
-  lazy val configV = "1.3.2"
-  lazy val scalikejdbcV = "3.3.1"
-  lazy val scalaTestV = "3.0.4"
-  lazy val scodecV = "1.1.5"
-  lazy val playV = "2.6.19"
-  lazy val awsV = "1.11.423"
-  lazy val jaxbV = "2.3.0"
+  lazy val akkaHttpV        = "10.1.5"
+  lazy val akkaV            = "2.5.12"
+  lazy val jettyV           = "8.1.12.v20130726"
+  lazy val pureConfigV      = "0.9.2"
+  lazy val metricsScalaV    = "3.5.9"
+  lazy val prometheusV      = "0.4.0"
+  lazy val catsEffectV      = "1.0.0"
+  lazy val configV          = "1.3.2"
+  lazy val scalikejdbcV     = "3.3.1"
+  lazy val scalaTestV       = "3.0.4"
+  lazy val scodecV          = "1.1.5"
+  lazy val playV            = "2.6.19"
+  lazy val awsV             = "1.11.423"
+  lazy val jaxbV            = "2.3.0"
+  lazy val fs2V             = "1.0.0"
   lazy val ip4sV = "1.1.1"
 
   lazy val apiDependencies = Seq(
@@ -38,7 +39,7 @@ object Dependencies {
     "org.scalikejdbc"           %% "scalikejdbc-config"             % scalikejdbcV,
     "org.scodec"                %% "scodec-bits"                    % scodecV,
     "org.slf4j"                 %  "slf4j-api"                      % "1.7.25",
-    "co.fs2"                    %% "fs2-core"                       % "1.0.0",
+    "co.fs2"                    %% "fs2-core"                       % fs2V,
     "com.github.pureconfig"     %% "pureconfig"                     % pureConfigV,
     "com.github.pureconfig"     %% "pureconfig-cats-effect"         % pureConfigV,
     "io.prometheus"             % "simpleclient_hotspot"            % prometheusV,

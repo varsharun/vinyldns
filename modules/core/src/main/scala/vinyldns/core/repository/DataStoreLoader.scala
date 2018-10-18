@@ -17,7 +17,7 @@
 package vinyldns.core.repository
 
 import cats.data._
-import cats.effect.{ContextShift, IO}
+import cats.effect.{ContextShift, IO, Timer}
 import cats.implicits._
 import vinyldns.core.crypto.CryptoAlgebra
 import org.slf4j.LoggerFactory
@@ -39,7 +39,7 @@ object DataStoreLoader {
   class DataLoaderResponse[A](
       val accessor: A,
       shutdownHook: List[IO[Unit]],
-      val healthChecks: List[HealthCheck]) {
+      val healthChecks: List[HealthCheck])(implicit cs: ContextShift[IO]) {
     def shutdown(): Unit = shutdownHook.parSequence.unsafeRunSync()
   }
 
@@ -49,7 +49,9 @@ object DataStoreLoader {
   def loadAll[A <: DataAccessor](
       configs: List[DataStoreConfig],
       crypto: CryptoAlgebra,
-      dataAccessorProvider: DataAccessorProvider[A]): IO[DataLoaderResponse[A]] =
+      dataAccessorProvider: DataAccessorProvider[A])(
+      implicit cs: ContextShift[IO],
+      t: Timer[IO]): IO[DataLoaderResponse[A]] =
     for {
       activeConfigs <- IO.fromEither(getValidatedConfigs(configs, dataAccessorProvider.repoNames))
       dataStores <- activeConfigs.map(load(_, crypto)).parSequence
@@ -61,7 +63,9 @@ object DataStoreLoader {
         dataStores.map(_.healthCheck)
       )
 
-  def load(config: DataStoreConfig, crypto: CryptoAlgebra): IO[DataStoreInfo] =
+  def load(config: DataStoreConfig, crypto: CryptoAlgebra)(
+      implicit cs: ContextShift[IO],
+      t: Timer[IO]): IO[DataStoreInfo] =
     for {
       _ <- IO(
         logger.error(

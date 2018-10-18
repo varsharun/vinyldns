@@ -17,7 +17,7 @@
 package vinyldns.dynamodb.repository
 
 import cats.implicits._
-import cats.effect.{ContextShift, IO}
+import cats.effect.{ContextShift, IO, Timer}
 import org.slf4j.LoggerFactory
 import vinyldns.core.repository._
 import pureconfig.module.catseffect.loadConfigF
@@ -37,7 +37,9 @@ class DynamoDBDataStoreProvider extends DataStoreProvider {
   private implicit val cs: ContextShift[IO] =
     IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def load(config: DataStoreConfig, crypto: CryptoAlgebra): IO[LoadedDataStore] =
+  def load(config: DataStoreConfig, crypto: CryptoAlgebra)(
+      implicit cs: ContextShift[IO],
+      t: Timer[IO]): IO[LoadedDataStore] =
     for {
       settingsConfig <- loadConfigF[IO, DynamoDBDataStoreSettings](config.settings)
       _ <- validateRepos(config.repositories)
@@ -56,8 +58,8 @@ class DynamoDBDataStoreProvider extends DataStoreProvider {
     }
   }
 
-  def loadRepoConfigs(
-      config: RepositoriesConfig): IO[Map[RepositoryName, DynamoDBRepositorySettings]] = {
+  def loadRepoConfigs(config: RepositoriesConfig)(
+      implicit cs: ContextShift[IO]): IO[Map[RepositoryName, DynamoDBRepositorySettings]] = {
 
     def loadConfigIfDefined(
         repositoryName: RepositoryName): Option[IO[(RepositoryName, DynamoDBRepositorySettings)]] =
@@ -73,7 +75,7 @@ class DynamoDBDataStoreProvider extends DataStoreProvider {
   def initializeRepos(
       dynamoConfig: DynamoDBDataStoreSettings,
       repoSettings: Map[RepositoryName, DynamoDBRepositorySettings],
-      crypto: CryptoAlgebra): IO[DataStore] = {
+      crypto: CryptoAlgebra)(implicit cs: ContextShift[IO], t: Timer[IO]): IO[DataStore] = {
 
     def initializeSingleRepo[T <: Repository](
         repoName: RepositoryName,

@@ -16,7 +16,7 @@
 
 package vinyldns.core.queue
 import cats.data.NonEmptyList
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import vinyldns.core.domain.zone.ZoneCommand
 import vinyldns.core.health.HealthCheck.HealthCheck
 
@@ -49,7 +49,7 @@ trait MessageQueue {
 
   // receives a batch of messages.  In SQS, we require number of messages, message attributes, and timeout.
   // the latter of those are likely not applicable for all message queues, but a count certainly is
-  def receive(count: MessageCount): IO[List[CommandMessage]]
+  def receive(count: MessageCount)(implicit cs: ContextShift[IO]): IO[List[CommandMessage]]
 
   // puts the message back on the queue with the intention of having it re-processed again
   def requeue(message: CommandMessage): IO[Unit]
@@ -61,7 +61,8 @@ trait MessageQueue {
   def changeMessageTimeout(message: CommandMessage, duration: FiniteDuration): IO[Unit]
 
   // we need to track which messages failed and report that back to the caller
-  def sendBatch[A <: ZoneCommand](messages: NonEmptyList[A]): IO[SendBatchResult[A]]
+  def sendBatch[A <: ZoneCommand](messages: NonEmptyList[A])(
+      implicit cs: ContextShift[IO]): IO[SendBatchResult[A]]
 
   // sends a single message, exceptions will be raised via IO
   def send[A <: ZoneCommand](command: A): IO[Unit]

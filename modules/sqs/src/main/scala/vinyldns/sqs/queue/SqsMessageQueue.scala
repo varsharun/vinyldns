@@ -38,7 +38,8 @@ import vinyldns.sqs.queue.SqsMessageType.{SqsRecordSetChangeMessage, SqsZoneChan
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.FiniteDuration
 
-class SqsMessageQueue(val queueUrl: String, val client: AmazonSQSAsync)
+class SqsMessageQueue(val queueUrl: String, val client: AmazonSQSAsync)(
+    implicit cs: ContextShift[IO])
     extends MessageQueue
     with Monitored {
 
@@ -67,7 +68,7 @@ class SqsMessageQueue(val queueUrl: String, val client: AmazonSQSAsync)
     * For each message pulled off, attempt to parse the message.  If that fails, log loudly and remove
     * it from the message queue
     */
-  def receive(count: MessageCount): IO[List[SqsMessage]] =
+  def receive(count: MessageCount)(implicit cs: ContextShift[IO]): IO[List[SqsMessage]] =
     monitor("queue.SQS.receive") {
       logger.debug(s"Receiving $count messages.\n")
       sqsAsync[ReceiveMessageRequest, ReceiveMessageResult](
@@ -83,7 +84,7 @@ class SqsMessageQueue(val queueUrl: String, val client: AmazonSQSAsync)
       ).flatMap(receiveResult => parseBatch(receiveResult.getMessages.asScala.toList))
     }
 
-  def parseBatch(messages: List[Message]): IO[List[SqsMessage]] =
+  def parseBatch(messages: List[Message])(implicit cs: ContextShift[IO]): IO[List[SqsMessage]] =
     // attempt to parse each message that arrives, failures will be removed and not returned
     messages
       .map(parse)
@@ -130,7 +131,8 @@ class SqsMessageQueue(val queueUrl: String, val client: AmazonSQSAsync)
         client.sendMessageAsync)
     }.as(())
 
-  def sendBatch[A <: ZoneCommand](cmds: NonEmptyList[A]): IO[SendBatchResult[A]] =
+  def sendBatch[A <: ZoneCommand](cmds: NonEmptyList[A])(
+      implicit cs: ContextShift[IO]): IO[SendBatchResult] =
     monitor("queue.SQS.sendBatch") {
       toSendMessageBatchRequest(cmds)
         .map { sendRequest =>

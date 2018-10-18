@@ -42,9 +42,8 @@ object DynamoDBGroupRepository {
   private val ADMIN_IDS = "admin_ids"
   private val GROUP_NAME_INDEX = "group_name_index"
 
-  def apply(
-      config: DynamoDBRepositorySettings,
-      dynamoConfig: DynamoDBDataStoreSettings): IO[DynamoDBGroupRepository] = {
+  def apply(config: DynamoDBRepositorySettings, dynamoConfig: DynamoDBDataStoreSettings)(
+      implicit t: Timer[IO]): IO[DynamoDBGroupRepository] = {
 
     val dynamoDBHelper = new DynamoDBHelper(
       DynamoDBClient(dynamoConfig),

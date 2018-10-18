@@ -39,9 +39,8 @@ object DynamoDBGroupChangeRepository {
   private[repository] val GROUP_CHANGE_ATTR = "group_change_blob"
   private val GROUP_ID_AND_CREATED_INDEX = "GROUP_ID_AND_CREATED_INDEX"
 
-  def apply(
-      config: DynamoDBRepositorySettings,
-      dynamoConfig: DynamoDBDataStoreSettings): IO[DynamoDBGroupChangeRepository] = {
+  def apply(config: DynamoDBRepositorySettings, dynamoConfig: DynamoDBDataStoreSettings)(
+      implicit t: Timer[IO]): IO[DynamoDBGroupChangeRepository] = {
 
     val dynamoDBHelper = new DynamoDBHelper(
       DynamoDBClient(dynamoConfig),

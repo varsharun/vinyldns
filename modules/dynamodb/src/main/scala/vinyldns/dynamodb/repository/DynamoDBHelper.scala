@@ -45,7 +45,7 @@ trait DynamoUtils {
 }
 
 /* Used to provide an exponential backoff in the event of a Provisioned Throughput Exception */
-class DynamoDBHelper(dynamoDB: AmazonDynamoDBClient, log: Logger) {
+class DynamoDBHelper(dynamoDB: AmazonDynamoDBClient, log: Logger)(implicit t: Timer[IO]) {
 
   private[repository] val retryCount: Int = 10
   private val retryBackoff: FiniteDuration = 1.millis
@@ -71,7 +71,8 @@ class DynamoDBHelper(dynamoDB: AmazonDynamoDBClient, log: Logger) {
   def shutdown(): Unit = dynamoDB.shutdown()
 
   private[repository] def send[In <: AmazonWebServiceRequest, Out](aws: In, func: In => Out)(
-      implicit d: Describe[_ >: In]): IO[Out] = {
+      implicit d: Describe[_ >: In],
+      t: Timer[IO]): IO[Out] = {
 
     def name = d.desc(aws)
 

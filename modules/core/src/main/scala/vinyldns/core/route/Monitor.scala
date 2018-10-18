@@ -20,7 +20,6 @@ import cats.effect._
 import nl.grons.metrics.scala.{Histogram, Meter, MetricName}
 import org.slf4j.{Logger, LoggerFactory}
 import vinyldns.core.Instrumented
-
 import scala.collection._
 
 trait Monitored {
